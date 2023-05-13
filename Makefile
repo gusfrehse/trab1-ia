@@ -1,4 +1,4 @@
-CC 			:= gcc
+CC 			:= g++
 CFLAGS 		:= -Wall
 LDFLAGS		:=
 RM			:= rm -rf
@@ -9,8 +9,8 @@ SOURCEDIR	:= source
 BUILDDIR 	:= build
 INCLUDEDIR 	:= include
 
-SOURCES 	:= $(shell find $(SOURCEDIR) -name '*.c')
-OBJECTS		:= $(patsubst $(SOURCEDIR)/%.c, $(BUILDDIR)/%.o, $(SOURCES))
+SOURCES 	:= $(shell find $(SOURCEDIR) -name '*.cpp')
+OBJECTS		:= $(patsubst $(SOURCEDIR)/%.cpp, $(BUILDDIR)/%.o, $(SOURCES))
 BUILDSDIRS	:= $(sort $(patsubst $(SOURCEDIR)/%, $(BUILDDIR)/%, $(dir $(SOURCES))))
 
 .PHONY : all clean purge
@@ -20,7 +20,7 @@ all: $(BINARY)
 $(BINARY): $(OBJECTS)
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS)
 
-$(BUILDDIR)/%.o: $(SOURCEDIR)/%.c | $(BUILDSDIRS)
+$(BUILDDIR)/%.o: $(SOURCEDIR)/%.cpp | $(BUILDSDIRS)
 	$(CC) $(CFLAGS) -I$(INCLUDEDIR) -c $< -o $@
 
 $(BUILDSDIRS):
