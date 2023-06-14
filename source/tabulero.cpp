@@ -57,7 +57,7 @@ auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
 
     uint8_t blockColor = tabulero[xi * cols + yi];
 
-    int perimeter = 0;
+    int area = 0;
 
     while (!squaresLeft.empty()) {
         const auto [x, y] = squaresLeft.top();
@@ -67,7 +67,7 @@ auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
         if (tabulero[x * cols + y] != blockColor)
             continue;
 
-        perimeter += 1;
+        area += 1;
 
         if (x + 1 < cols && visited[(x + 1) * cols + y])
             squaresLeft.push({x + 1, y});
@@ -82,7 +82,7 @@ auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
             squaresLeft.push({x, y - 1});
     }
 
-    return perimeter;
+    return area;
 }
 
 auto Tabulero::calculateArea() const -> int

@@ -1,8 +1,7 @@
+#pragma once
+
 #include "tabulero.hpp"
 
-class Solucionador
-{
-public:
-    // Solucionador() = delete;
-    auto solve(const Tabulero& tabulero) -> void;
-};
+using Acao = std::tuple<Canto, int>;
+
+auto solve(const Tabulero& tabulero) -> std::vector<Acao>;
