@@ -4,9 +4,17 @@
 
 int main()
 {
-    std::cout << "Hello, World!" << std::endl;
-    
     Tabulero tabulero = Tabulero::readFromInput();
-    solve(tabulero);
+    auto solucion = solve(tabulero);
+
+    std::cout << solucion.size() << std::endl;
+    
+    for (const auto& acao : solucion)
+    {
+        std::cout << (char) std::get<0>(acao) << " " << std::get<1>(acao) << " ";
+    }
+
+    std::cout << std::endl;
+
     return 0;
 }

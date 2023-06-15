@@ -54,32 +54,44 @@ auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
     std::vector<bool> visited(cols * lines, false);
     std::stack<std::tuple<int, int>> squaresLeft;
     squaresLeft.push({xi, yi});
+    visited[yi * cols + xi] = true;
 
-    uint8_t blockColor = tabulero[xi * cols + yi];
+    uint8_t blockColor = tabulero[yi * cols + xi];
 
     int area = 0;
 
     while (!squaresLeft.empty()) {
         const auto [x, y] = squaresLeft.top();
         squaresLeft.pop();
-        visited[x * cols + y] = true;
 
-        if (tabulero[x * cols + y] != blockColor)
+        if (tabulero[y * cols + x] != blockColor)
             continue;
 
         area += 1;
 
-        if (x + 1 < cols && visited[(x + 1) * cols + y])
+        if (x + 1 < cols && !visited[y * cols + (x + 1)])
+        {
             squaresLeft.push({x + 1, y});
+            visited[y * cols + (x + 1)] = true;
+        }
 
-        if (x - 1 >= 0 && visited[(x - 1) * cols + y])
+        if (x - 1 >= 0 && !visited[y * cols + (x - 1)])
+        {
             squaresLeft.push({x - 1, y});
+            visited[y * cols + (x - 1)] = true;
+        }
 
-        if (y + 1 < lines && visited[x * cols + y + 1])
+        if (y + 1 < lines && !visited[(y + 1) * cols + x])
+        {
             squaresLeft.push({x, y + 1});
+            visited[(y + 1) * cols + x] = true;
+        }
 
-        if (y - 1 >= 0 && visited[x * cols + y - 1])
+        if (y - 1 >= 0 && !visited[(y - 1) * cols + x])
+        {
             squaresLeft.push({x, y - 1});
+            visited[(y - 1) * cols + x] = true;
+        }
     }
 
     return area;
@@ -95,33 +107,88 @@ auto Tabulero::calculateArea() const -> int
     });
 }
 
-auto Tabulero::paint(Canto canto, Cor cor) const -> Tabulero
+auto Tabulero::paintAt(int xi, int yi, Cor cor) const -> Tabulero
 {
     Tabulero newTabulero = clone();
+    std::vector<bool> visited(cols * lines, false);
+    std::stack<std::tuple<int, int>> squaresLeft;
 
-    switch (canto)
-    {
-    case Canto::TopLeft:
-        newTabulero.tabulero[0] = cor;
-        break;
+    squaresLeft.push({xi, yi});
+    visited[yi * cols + xi] = true;
 
-    case Canto::TopRight:
-        newTabulero.tabulero[cols - 1] = cor;
-        break;
+    Cor initialColor = tabulero[yi * cols + xi];
 
-    case Canto::BottomLeft:
-        newTabulero.tabulero[lines * cols - cols] = cor;
-        break;
-        
-    case Canto::BottomRight:
-        newTabulero.tabulero[lines * cols - 1] = cor;
-        break;
+    while (!squaresLeft.empty()) {
+        const auto [x, y] = squaresLeft.top();
+        squaresLeft.pop();
+
+        if (newTabulero.tabulero[y * cols + x] != initialColor)
+            continue;
+
+        newTabulero.tabulero[y * cols + x] = cor;
+
+        if (x + 1 < cols && !visited[y * cols + (x + 1)])
+        {
+            squaresLeft.push({x + 1, y});
+            visited[y * cols + (x + 1)] = true;
+        }
+
+        if (x - 1 >= 0 && !visited[y * cols + (x - 1)])
+        {
+            squaresLeft.push({x - 1, y});
+            visited[y * cols + (x - 1)] = true;
+        }
+
+        if (y + 1 < lines && !visited[(y + 1) * cols + x])
+        {
+            squaresLeft.push({x, y + 1});
+            visited[(y + 1) * cols + x] = true;
+        }
+
+        if (y - 1 >= 0 && !visited[(y - 1) * cols + x])
+        {
+            squaresLeft.push({x, y - 1});
+            visited[(y - 1) * cols + x] = true;
+        }
     }
 
     return newTabulero;
 }
 
+auto Tabulero::paint(Canto canto, Cor cor) const -> Tabulero
+{
+    switch (canto)
+    {
+    case Canto::TopLeft:
+        return paintAt(0, 0, cor);
+
+    case Canto::TopRight:
+        return paintAt(cols - 1, 0, cor);
+
+    case Canto::BottomLeft:
+        return paintAt(0, lines - 1, cor);
+    
+    case Canto::BottomRight:
+    default:
+        return paintAt(cols - 1, lines - 1, cor);
+    }
+}
+
 auto Tabulero::getColors() const -> int
 {
     return colors;
+}
+
+auto operator<<(std::ostream& os, const Tabulero& tabulero) -> std::ostream&
+{
+    for (int i = 0; i < tabulero.lines; i++)
+    {
+        for (int j = 0; j < tabulero.cols; j++)
+        {
+            os << tabulero.tabulero[i * tabulero.cols + j] << " ";
+        }
+        os << std::endl;
+    }
+
+    return os;
 }
