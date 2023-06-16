@@ -29,6 +29,9 @@ $(BUILDSDIRS):
 debug: CFLAGS += -g
 debug: all
 
+prod: CFLAGS += -O3
+prod: all
+
 clean:
 	$(RM) $(OBJECTS)
 

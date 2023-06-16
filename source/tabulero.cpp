@@ -51,18 +51,27 @@ auto Tabulero::clone() const -> Tabulero
 }
 
 auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
-    std::vector<bool> visited(cols * lines, false);
-    std::stack<std::tuple<int, int>> squaresLeft;
-    squaresLeft.push({xi, yi});
+    //std::stack<std::tuple<int, int>> squaresLeft;
+    //squaresLeft.push({xi, yi});
+
+    std::tuple<int, int> squaresLeft[cols * lines];
+    int stackSize = 0;
+
+    squaresLeft[stackSize++] = {xi, yi};
+
+    bool visited[cols * lines];
+    for (int i = 0; i < cols * lines; i++)
+    {
+        visited[i] = false;
+    }	
     visited[yi * cols + xi] = true;
 
     uint8_t blockColor = tabulero[yi * cols + xi];
 
     int area = 0;
 
-    while (!squaresLeft.empty()) {
-        const auto [x, y] = squaresLeft.top();
-        squaresLeft.pop();
+    while (stackSize > 0) {
+        const auto [x, y] = squaresLeft[--stackSize];
 
         if (tabulero[y * cols + x] != blockColor)
             continue;
@@ -71,25 +80,29 @@ auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
 
         if (x + 1 < cols && !visited[y * cols + (x + 1)])
         {
-            squaresLeft.push({x + 1, y});
+            //squaresLeft.push({x + 1, y});
+            squaresLeft[stackSize++] = {x + 1, y};
             visited[y * cols + (x + 1)] = true;
         }
 
         if (x - 1 >= 0 && !visited[y * cols + (x - 1)])
         {
-            squaresLeft.push({x - 1, y});
+            //squaresLeft.push({x - 1, y});
+            squaresLeft[stackSize++] = {x - 1, y};
             visited[y * cols + (x - 1)] = true;
         }
 
         if (y + 1 < lines && !visited[(y + 1) * cols + x])
         {
-            squaresLeft.push({x, y + 1});
+            //squaresLeft.push({x, y + 1});
+            squaresLeft[stackSize++] = {x, y + 1};
             visited[(y + 1) * cols + x] = true;
         }
 
         if (y - 1 >= 0 && !visited[(y - 1) * cols + x])
         {
-            squaresLeft.push({x, y - 1});
+            //squaresLeft.push({x, y - 1});
+            squaresLeft[stackSize++] = {x, y - 1};
             visited[(y - 1) * cols + x] = true;
         }
     }
@@ -107,10 +120,20 @@ auto Tabulero::calculateArea() const -> int
     });
 }
 
+auto Tabulero::calculateAreaLeft() const -> int
+{
+    return cols * lines - calculateArea();
+}
+
 auto Tabulero::paintAt(int xi, int yi, Cor cor) const -> Tabulero
 {
     Tabulero newTabulero = clone();
-    std::vector<bool> visited(cols * lines, false);
+    // std::vector<bool> visited(cols * lines, false);
+    bool visited[cols * lines];
+    for (int i = 0; i < cols * lines; i++)
+    {
+        visited[i] = false;
+    }	
     std::stack<std::tuple<int, int>> squaresLeft;
 
     squaresLeft.push({xi, yi});
@@ -177,6 +200,11 @@ auto Tabulero::paint(Canto canto, Cor cor) const -> Tabulero
 auto Tabulero::getColors() const -> int
 {
     return colors;
+}
+
+auto Tabulero::size() const -> int
+{
+    return lines * cols;
 }
 
 auto operator<<(std::ostream& os, const Tabulero& tabulero) -> std::ostream&
