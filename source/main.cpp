@@ -16,7 +16,7 @@ int main()
     
     for (const auto& acao : solucion)
     {
-        std::cout << ((char) std::get<0>(acao)) << " " << std::get<1>(acao) << " ";
+        std::cout << ((char) acao.first) << " " << acao.second << " ";
     }
 
     std::cout << std::endl;
