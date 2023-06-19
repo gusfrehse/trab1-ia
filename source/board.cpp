@@ -1,4 +1,4 @@
-#include "tabulero.hpp"
+#include "board.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -6,33 +6,31 @@
 #include <tuple>
 #include <algorithm>
 
-Tabulero::Tabulero(int lines, int cols, int colors) : lines(lines), cols(cols), colors(colors), tabulero(lines * cols) 
-{
-}
+Board::Board(int lines, int cols, int colors) : lines(lines), cols(cols), colors(colors), board(lines * cols) {}
 
-auto Tabulero::readFromInput() -> Tabulero
+auto Board::readFromInput() -> Board
 {
     int lines, cols, colors;
     std::cin >> lines >> cols >> colors;
-    Tabulero tabulero(lines, cols, colors);
+    Board board(lines, cols, colors);
 
     for (int i = 0; i < lines; i++)
     {
         for (int j = 0; j < cols; j++)
         {
-            std::cin >> tabulero.tabulero[i * cols + j];
+            std::cin >> board.board[i * cols + j];
         }
     }
 
-    return tabulero;
+    return board;
 }
 
-auto Tabulero::isSolved() const -> bool
+auto Board::isSolved() const -> bool
 {
-    const auto firstColor = tabulero[0];
+    const auto firstColor = board[0];
     for (int i = 0; i < lines * cols; i++)
     {
-        if (tabulero[i] != firstColor)
+        if (board[i] != firstColor)
         {
             return false;
         }
@@ -41,17 +39,17 @@ auto Tabulero::isSolved() const -> bool
     return true;
 }
 
-auto Tabulero::clone() const -> Tabulero
+auto Board::clone() const -> Board
 {
-    Tabulero newTabulero;
-    newTabulero.lines = lines;
-    newTabulero.cols = cols;
-    newTabulero.colors = colors;
-    newTabulero.tabulero = tabulero;
-    return newTabulero;
+    Board newBoard;
+    newBoard.lines = lines;
+    newBoard.cols = cols;
+    newBoard.colors = colors;
+    newBoard.board = board;
+    return newBoard;
 }
 
-auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
+auto Board::calculateAreaAt(int xi, int yi) const -> int {
     std::tuple<int, int> squaresLeft[cols * lines];
     int stackSize = 0;
 
@@ -64,42 +62,38 @@ auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
     }	
     visited[yi * cols + xi] = true;
 
-    uint8_t blockColor = tabulero[yi * cols + xi];
+    uint8_t blockColor = board[yi * cols + xi];
 
     int area = 0;
 
     while (stackSize > 0) {
         const auto [x, y] = squaresLeft[--stackSize];
 
-        if (tabulero[y * cols + x] != blockColor)
+        if (board[y * cols + x] != blockColor)
             continue;
 
         area += 1;
 
         if (x + 1 < cols && !visited[y * cols + (x + 1)])
         {
-            //squaresLeft.push({x + 1, y});
             squaresLeft[stackSize++] = {x + 1, y};
             visited[y * cols + (x + 1)] = true;
         }
 
         if (x - 1 >= 0 && !visited[y * cols + (x - 1)])
         {
-            //squaresLeft.push({x - 1, y});
             squaresLeft[stackSize++] = {x - 1, y};
             visited[y * cols + (x - 1)] = true;
         }
 
         if (y + 1 < lines && !visited[(y + 1) * cols + x])
         {
-            //squaresLeft.push({x, y + 1});
             squaresLeft[stackSize++] = {x, y + 1};
             visited[(y + 1) * cols + x] = true;
         }
 
         if (y - 1 >= 0 && !visited[(y - 1) * cols + x])
         {
-            //squaresLeft.push({x, y - 1});
             squaresLeft[stackSize++] = {x, y - 1};
             visited[(y - 1) * cols + x] = true;
         }
@@ -108,7 +102,7 @@ auto Tabulero::calculateAreaAt(int xi, int yi) const -> int {
     return area;
 }
 
-auto Tabulero::calculateArea() const -> int
+auto Board::calculateArea() const -> int
 {
     return std::max({
         calculateAreaAt(0, 0),
@@ -118,33 +112,33 @@ auto Tabulero::calculateArea() const -> int
     });
 }
 
-auto Tabulero::calculateAreaLeft() const -> int
+auto Board::calculateAreaLeft() const -> int
 {
     return cols * lines - calculateArea();
 }
 
-auto Tabulero::heuristicY() const -> int
+auto Board::heuristicY() const -> int
 {
     int count = 0;
-    Cor lastColor = tabulero[0];
+    Color lastColor = board[0];
     for (int j = 1; j < cols; j++)
     {
-        if (tabulero[(j - 1) * cols + j] != lastColor)
+        if (board[(j - 1) * cols + j] != lastColor)
         {
             count += 19;
-            lastColor = tabulero[(j - 1) * cols + j];
+            lastColor = board[(j - 1) * cols + j];
         }
-        if (tabulero[j * cols + j] != lastColor)
+        if (board[j * cols + j] != lastColor)
         {
             count += 19;
-            lastColor = tabulero[j * cols + j];
+            lastColor = board[j * cols + j];
         }
     }
 
     return count;
 }
 
-auto Tabulero::minimumStepsToSolve() const -> int
+auto Board::minimumStepsToSolve() const -> int
 {
     bool hasThisColor[colors];
     for (int i = 0; i < colors; i++)
@@ -154,16 +148,16 @@ auto Tabulero::minimumStepsToSolve() const -> int
 
     for (int i = 0; i < lines * cols; i++)
     {
-        int currentColor = tabulero[i];
+        int currentColor = board[i];
         hasThisColor[currentColor - 1] = true;
     }
 
     return std::count(hasThisColor, hasThisColor + colors, true);
 }
 
-auto Tabulero::paintAt(int xi, int yi, Cor cor) const -> Tabulero
+auto Board::paintAt(int xi, int yi, Color cor) const -> Board
 {
-    Tabulero newTabulero = clone();
+    Board newBoard = clone();
     bool visited[cols * lines];
     for (int i = 0; i < cols * lines; i++)
     {
@@ -174,16 +168,16 @@ auto Tabulero::paintAt(int xi, int yi, Cor cor) const -> Tabulero
     squaresLeft.push({xi, yi});
     visited[yi * cols + xi] = true;
 
-    Cor initialColor = tabulero[yi * cols + xi];
+    Color initialColor = board[yi * cols + xi];
 
     while (!squaresLeft.empty()) {
         const auto [x, y] = squaresLeft.top();
         squaresLeft.pop();
 
-        if (newTabulero.tabulero[y * cols + x] != initialColor)
+        if (newBoard.board[y * cols + x] != initialColor)
             continue;
 
-        newTabulero.tabulero[y * cols + x] = cor;
+        newBoard.board[y * cols + x] = cor;
 
         if (x + 1 < cols && !visited[y * cols + (x + 1)])
         {
@@ -210,45 +204,45 @@ auto Tabulero::paintAt(int xi, int yi, Cor cor) const -> Tabulero
         }
     }
 
-    return newTabulero;
+    return newBoard;
 }
 
-auto Tabulero::paint(Canto canto, Cor cor) const -> Tabulero
+auto Board::paint(Corner canto, Color cor) const -> Board
 {
     switch (canto)
     {
-    case Canto::TopLeft:
+    case Corner::TopLeft:
         return paintAt(0, 0, cor);
 
-    case Canto::TopRight:
+    case Corner::TopRight:
         return paintAt(cols - 1, 0, cor);
 
-    case Canto::BottomLeft:
+    case Corner::BottomLeft:
         return paintAt(0, lines - 1, cor);
     
-    case Canto::BottomRight:
+    case Corner::BottomRight:
     default:
         return paintAt(cols - 1, lines - 1, cor);
     }
 }
 
-auto Tabulero::getColors() const -> int
+auto Board::getColors() const -> int
 {
     return colors;
 }
 
-auto Tabulero::size() const -> int
+auto Board::size() const -> int
 {
     return lines * cols;
 }
 
-auto operator<<(std::ostream& os, const Tabulero& tabulero) -> std::ostream&
+auto operator<<(std::ostream& os, const Board& board) -> std::ostream&
 {
-    for (int i = 0; i < tabulero.lines; i++)
+    for (int i = 0; i < board.lines; i++)
     {
-        for (int j = 0; j < tabulero.cols; j++)
+        for (int j = 0; j < board.cols; j++)
         {
-            os << std::setw(2) << tabulero.tabulero[i * tabulero.cols + j] << " ";
+            os << std::setw(2) << board.board[i * board.cols + j] << " ";
         }
         os << std::endl;
     }

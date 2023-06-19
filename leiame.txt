@@ -1,0 +1,40 @@
+TRABALHO 1 INTELIGÊNCIA ARTIFICIAL - FLOOD IT
+=============================================
+
+Vinícius Maurício Ribeiro (GRR20203911) e Gustavo Silveira Frehse (GRR20203927)
+
+
+Modelagem
+---------
+
+Modelamos o problema como uma busca no espaço de estados.  Cada estado é um
+tabuleiro, implementado como uma matriz de inteiros (cada inteiro representa uma
+cor).  As ações são modeladas como um par de um canto (a, b, c ou d) e uma cor
+(inteiro). O modelo de transição de uma ação (canto, cor) é "pintar" a região do
+'canto' com a cor 'cor'. O custo de uma ação é sempre 1. O estado inicial é dado
+pela entrada e os estados objetivo são todos os estados coloridos com apenas uma
+cor.
+
+
+Algoritmo
+---------
+
+Usamos o algoritmo A* para encontrarmos uma solução. Como usamos uma heurística
+pessimista, não achamos necessariamente a solução ótima.
+
+
+Heurística
+----------
+
+Usamos uma combinação de heurísticas:
+ - Área restante: área não "consumida" pelo maior componente de um canto.
+ - Quantidade de troca de cores na diagonal principal (heuristicY): cria um bias 
+   para completar o tabuleiro seguindo a diagonal principal. 
+ - Número de cores restantes: Ajuda no final, quando as outras heurísticas
+   reportam o mesmo valor.
+
+A heuristicY tem um peso maior sempre, mas ao completar a diagonal principal, seu
+valor se torna 0, e a partir daí a heurística de área restante domina. No final,
+quando a área restante é muito pequena, a heurística de cores ajuda no desempate.
+
+

@@ -1,5 +1,5 @@
 CC 			:= g++ -std=c++17
-CFLAGS 		:= -Wall
+CFLAGS 		:= -Wall -Ofast
 LDFLAGS		:=
 RM			:= rm -rf
 

@@ -1,20 +1,16 @@
 #include <iostream>
-#include "tabulero.hpp"
-#include "solucionador.hpp"
+#include "board.hpp"
+#include "solver.hpp"
 
 int main()
 {
-    Tabulero tabulero = Tabulero::readFromInput();
+    Board board = Board::readFromInput();
 
-    //std::cout << tabulero.calculateArea() << std::endl;
+    auto solution = solve(board);
 
-    //exit(0);
-
-    auto solucion = solve(tabulero);
-
-    std::cout << solucion.size() << std::endl;
+    std::cout << solution.size() << std::endl;
     
-    for (const auto& acao : solucion)
+    for (const auto& acao : solution)
     {
         std::cout << ((char) acao.first) << " " << acao.second << " ";
     }
