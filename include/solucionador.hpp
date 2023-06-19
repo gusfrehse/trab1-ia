@@ -4,6 +4,6 @@
 
 #include <deque>
 
-using Acao = std::tuple<Canto, int>;
+using Acao = std::pair<Canto, int>;
 
 auto solve(const Tabulero& tabulero) -> std::deque<Acao>;

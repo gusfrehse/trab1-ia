@@ -75,7 +75,7 @@ auto solve(const Tabulero& tabulero) -> std::deque<Acao>
     
     // std::priority_queue<ArvoreBuscaTabuleroGrafoNodo*, pQueueComp> pQueue;
     
-    auto raiz = new ArvoreBuscaTabuleroGrafoNodo{tabulero, tabulero.size(), 0, 0, std::make_tuple(Canto::Null, -1), nullptr};
+    auto raiz = new ArvoreBuscaTabuleroGrafoNodo{tabulero, tabulero.size(), 0, 0, std::make_pair(Canto::Null, -1), nullptr};
     const ArvoreBuscaTabuleroGrafoNodo *prev = raiz;
     pQueue.push(raiz);
 
@@ -110,7 +110,7 @@ auto solve(const Tabulero& tabulero) -> std::deque<Acao>
             for (auto canto : {Canto::TopLeft, Canto::TopRight, Canto::BottomLeft, Canto::BottomRight})
             {
                 auto tabuleroCopia = tabuleroAtual.paint(canto, cor);
-                auto nodo = new ArvoreBuscaTabuleroGrafoNodo{tabuleroCopia, tabuleroCopia.heuristicY() + tabuleroCopia.calculateAreaLeft() + tabuleroCopia.minimumStepsToSolve(), 0/* tabuleroCopia.calculateAreaLeft() */,nodoAtual->passos + 1, std::make_tuple(canto, cor), nodoAtual};
+                auto nodo = new ArvoreBuscaTabuleroGrafoNodo{tabuleroCopia, tabuleroCopia.heuristicY() + tabuleroCopia.calculateAreaLeft() + tabuleroCopia.minimumStepsToSolve(), 0/* tabuleroCopia.calculateAreaLeft() */,nodoAtual->passos + 1, std::make_pair(canto, cor), nodoAtual};
                 auto minSteps = tabuleroCopia.minimumStepsToSolve();
 
                 // if (minSteps <= bestMinSteps)
