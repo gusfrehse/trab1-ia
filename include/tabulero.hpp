@@ -23,6 +23,16 @@ public:
     auto isSolved() const -> bool;
     auto calculateArea() const -> int;
     auto calculateAreaLeft() const -> int;
+    auto calculateChangesInDiagonals() const -> int;
+    auto calculatePerimeter() const -> int;
+    auto heuristicX() const -> int;
+    auto heuristicY() const -> int;
+    auto heuristicW() const -> int;
+    auto heuristicE() const -> int;
+    auto heuristicF() const -> int;
+    auto heuristicZen() const -> int;
+    auto sameColor() const -> int;
+    auto minimumStepsToSolve() const -> int;
     auto paintAt(int x, int y, Cor cor) const -> Tabulero;
     auto paint(Canto canto, Cor cor) const -> Tabulero;
     auto getColors() const -> int;

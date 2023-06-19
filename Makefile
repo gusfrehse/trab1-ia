@@ -29,6 +29,9 @@ $(BUILDSDIRS):
 debug: CFLAGS += -g
 debug: all
 
+gprof: CFLAGS += -g -pg
+gprof: all
+
 prod: CFLAGS += -O3
 prod: all
 

@@ -1,6 +1,7 @@
 #include "tabulero.hpp"
 
 #include <iostream>
+#include <iomanip>
 #include <stack>
 #include <tuple>
 #include <algorithm>
@@ -125,6 +126,290 @@ auto Tabulero::calculateAreaLeft() const -> int
     return cols * lines - calculateArea();
 }
 
+auto Tabulero::calculatePerimeter() const -> int
+{
+    std::tuple<int, int> squaresLeft[cols * lines];
+    int stackSize = 0;
+
+    squaresLeft[stackSize++] = {0, 0};
+
+    bool visited[cols * lines];
+    for (int i = 0; i < cols * lines; i++)
+    {
+        visited[i] = false;
+    }	
+
+    visited[0] = true;
+
+    uint8_t blockColor = tabulero[0];
+
+    int perimeter = 0;
+
+    while (stackSize > 0) {
+        const auto [x, y] = squaresLeft[--stackSize];
+
+        if (visited[y * cols + x])
+            continue;
+
+        bool isPerimeter = false;
+
+        if (x + 1 < cols && tabulero[y * cols + (x + 1)] == blockColor)
+        {
+            //squaresLeft.push({x + 1, y});
+            squaresLeft[stackSize++] = {x + 1, y};
+            visited[y * cols + (x + 1)] = true;
+        }
+        else
+            isPerimeter = true;
+
+        if (x - 1 >= 0 && tabulero[y * cols + (x - 1)] == blockColor)
+        {
+            //squaresLeft.push({x - 1, y});
+            squaresLeft[stackSize++] = {x - 1, y};
+            visited[y * cols + (x - 1)] = true;
+        }
+        else
+            isPerimeter = true;
+
+        if (y + 1 < lines && tabulero[(y + 1) * cols + x] == blockColor)
+        {
+            //squaresLeft.push({x, y + 1});
+            squaresLeft[stackSize++] = {x, y + 1};
+            visited[(y + 1) * cols + x] = true;
+        }
+        else
+            isPerimeter = true;
+
+        if (y - 1 >= 0 && tabulero[(y - 1) * cols + x] == blockColor) 
+        {
+            //squaresLeft.push({x, y - 1});
+            squaresLeft[stackSize++] = {x, y - 1};
+            visited[(y - 1) * cols + x] = true;
+        }
+        else
+            isPerimeter = true;
+
+        if (isPerimeter)
+            perimeter++;
+    }
+
+    return perimeter;
+}
+
+auto Tabulero::heuristicX() const -> int
+{
+    int count = 0;
+    Cor regionColor = tabulero[0];
+
+    for (int i = 0; i < std::min(lines, cols) && tabulero[i * cols + i] == regionColor; i++)
+        count++;
+
+    // for (int i = 0; i < std::min(lines, cols) && tabulero[i * cols + (std::min(lines, cols) - i) * cols] == regionColor; i++)
+    //     count++;
+
+    // for (int i = 0; i < std::min(lines, cols) && tabulero[i * cols] == regionColor; i++)
+    //     count++;
+     
+    // for (int i = 0; i < std::min(lines, cols) && tabulero[i * cols + cols - 1] == regionColor; i++)
+    //     count++;
+     
+    // for (int i = 0; i < std::min(lines, cols) && tabulero[i * lines] == regionColor; i++)
+    //     count++;
+
+    // for (int i = 0; i < std::min(lines, cols) && tabulero[i] == regionColor; i++)
+    //     count++;
+
+    return std::min(lines, cols) - count;
+}
+
+auto Tabulero::calculateChangesInDiagonals() const -> int
+{
+    int changes = 0;
+    for (int i = 0; i < cols; i++)
+    {
+        Cor lastColor = tabulero[i];
+        for (int j = i; j < lines; j++)
+        {
+            if (tabulero[j * cols + (j + i) % cols] != lastColor)
+            {
+                changes++;
+                lastColor = tabulero[j * cols + j];
+            }
+        }
+    }
+
+    return changes / std::max(lines, cols);
+}
+
+auto Tabulero::heuristicY() const -> int
+{
+    int count = 0;
+    Cor lastColor = tabulero[0];
+    for (int j = 1; j < cols; j++)
+    {
+        if (tabulero[(j - 1) * cols + j] != lastColor)
+        {
+            count += 19;
+            lastColor = tabulero[(j - 1) * cols + j];
+        }
+        if (tabulero[j * cols + j] != lastColor)
+        {
+            count += 19;
+            lastColor = tabulero[j * cols + j];
+        }
+    }
+
+    return count;
+
+    /*
+    if (count)
+        return count;
+    */
+
+    for (int i = 1; i < cols; i++)
+    {
+        // int count = 0;
+        Cor lastColor = tabulero[i];
+        for (int j = i + 1; j < cols; j++)
+        {
+            if (tabulero[(j - i - 1) * cols + j] != lastColor)
+            {
+                count++;
+                lastColor = tabulero[(j - i - 1) * cols + j];
+            }
+            if (tabulero[(j - i) * cols + j] != lastColor)
+            {
+                count++;
+                lastColor = tabulero[(j - i) * cols + j];
+            }
+        }
+
+        for (int j = i; j < cols; j++)
+        {
+            if (tabulero[j * cols + j - i] != lastColor)
+            {
+                count++;
+                lastColor = tabulero[j * cols + j - i];
+            }
+            if (tabulero[j * cols + j - i + 1] != lastColor)
+            {
+                count++;
+                lastColor = tabulero[j * cols + j - i + 1];
+            }
+        }
+
+        /*
+        if (count)
+            return count;
+        */
+    }
+
+    return count;
+}
+
+auto Tabulero::heuristicW() const -> int
+{
+    int count = 0;
+    Cor lastColor = tabulero[0];
+    for (int j = 0; j < cols; j++)
+    {
+        if (tabulero[j * cols + (cols - j - 1)] != lastColor)
+        {
+            count++;
+            lastColor = tabulero[j * cols + (cols - j - 1)];
+        }
+        count++;
+    }
+
+    return count;
+}
+
+auto Tabulero::heuristicE() const -> int
+{
+    int count = 0;
+    Cor lastColor = tabulero[0];
+    int x = cols / 2;
+    for (int j = 0; j < lines; j++)
+    {
+        if (tabulero[j * cols + x] != lastColor)
+        {
+            count++;
+            lastColor = tabulero[j * cols + x];
+        }
+        count++;
+    }
+
+    return count;
+}
+
+auto Tabulero::heuristicF() const -> int
+{
+    int count = 0;
+    Cor lastColor = tabulero[0];
+    int y = lines / 2;
+    for (int j = 0; j < lines; j++)
+    {
+        if (tabulero[y * cols + j] != lastColor)
+        {
+            count++;
+            lastColor = tabulero[y * cols + j];
+        }
+        count++;
+    }
+
+    return count;
+}
+
+auto Tabulero::heuristicZen() const -> int
+{
+    bool hasThisColor[colors];
+    for (int i = 0; i < colors; i++)
+    {
+        hasThisColor[i] = false;
+    }
+
+    for (int i = 0; i < lines * cols; i++)
+    {
+        int currentColor = tabulero[i];
+        hasThisColor[currentColor - 1] = true;
+    }
+
+    return std::count(hasThisColor, hasThisColor + colors, true);
+}
+
+auto Tabulero::sameColor() const -> int
+{
+    int colorsCount[colors];
+    for (int i = 0; i < colors; i++)
+    {
+        colorsCount[i] = 0;
+    }
+
+    for (int i = 0; i < lines * cols; i++)
+    {
+        colorsCount[tabulero[i] - 1]++;
+    }
+
+    return lines * cols - colorsCount[tabulero[0] - 1];
+}
+
+auto Tabulero::minimumStepsToSolve() const -> int
+{
+    bool hasThisColor[colors];
+    for (int i = 0; i < colors; i++)
+    {
+        hasThisColor[i] = false;
+    }
+
+    for (int i = 0; i < lines * cols; i++)
+    {
+        int currentColor = tabulero[i];
+        hasThisColor[currentColor - 1] = true;
+    }
+
+    return std::count(hasThisColor, hasThisColor + colors, true);
+}
+
 auto Tabulero::paintAt(int xi, int yi, Cor cor) const -> Tabulero
 {
     Tabulero newTabulero = clone();
@@ -213,7 +498,7 @@ auto operator<<(std::ostream& os, const Tabulero& tabulero) -> std::ostream&
     {
         for (int j = 0; j < tabulero.cols; j++)
         {
-            os << tabulero.tabulero[i * tabulero.cols + j] << " ";
+            os << std::setw(2) << tabulero.tabulero[i * tabulero.cols + j] << " ";
         }
         os << std::endl;
     }
